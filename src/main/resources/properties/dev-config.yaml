@@ -1,0 +1,6 @@
+system:
+  http:
+    port: "8081"
+  
+autodiscovery:
+  id: "18679373"

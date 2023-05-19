@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+    <apikit:config name="s-test-jmoronborraz-config" api="resource::6d124814-37f7-4766-acd3-0e33f24edc73:s-test-jmoronborraz:1.0.1:raml:zip:s-test-jmoronborraz.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="s-test-jmoronborraz-main">
+        <http:listener path="/api/*" config-ref="httpListenerConfig" allowedMethods="GET">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="s-test-jmoronborraz-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="s-test-jmoronborraz-console">
+        <http:listener path="/console/*" config-ref="httpListenerConfig" allowedMethods="GET">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="s-test-jmoronborraz-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\accounts:s-test-jmoronborraz-config">
+        <logger level="INFO" doc:name="START" doc:id="e63ffe05-1673-4c12-87c0-fd5ecc42640d" message="#[output application/json&#10;---&#10;{&#10;	tracepoint: &quot;START&quot;,&#10;	message: 'Get Accounts - System',&#10;	callId: correlationId,&#10;	time: now() &gt;&gt; &quot;Europe/Madrid&quot;&#10;}]" />
+        <salesforce:query doc:name="Query" doc:id="1b1653ee-4706-4e47-bbc9-5102dc9a7524" config-ref="Salesforce_Config">
+            <salesforce:salesforce-query><![CDATA[SELECT 
+  Id, Name, AccountNumber, Industry, Description, BillingStreet	
+FROM 
+  Account]]></salesforce:salesforce-query>
+        </salesforce:query>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <logger level="DEBUG" doc:name="payload" doc:id="a8f57c8d-48fe-4ef1-9c4c-1329966c5f50" message='#[output application/json&#10;---&#10;{&#10;	tracepoint: "FLOW",&#10;	message: payload,&#10;	callId: correlationId,&#10;	time: now() &gt;&gt; "Europe/Madrid"&#10;}]' category="com.deloitte.test" />
+        <logger level="INFO" doc:name="END" doc:id="3e1062bb-c016-4613-8d31-e63417576f36" message="#[output application/json&#10;---&#10;{&#10;	tracepoint: &quot;END&quot;,&#10;	message: 'Get Accounts - System',&#10;	callId: correlationId,&#10;	time: now() &gt;&gt; &quot;Europe/Madrid&quot;&#10;}]" />
+    </flow>
+    <flow name="get:\contacts:s-test-jmoronborraz-config" doc:id="e20cf394-c3e1-4f74-9932-3a273ed647e7">
+        <logger level="INFO" doc:name="START" doc:id="93679f98-a30d-4620-bd92-6d9352942722" message="#[output application/json&#10;---&#10;{&#10;	tracepoint: &quot;START&quot;,&#10;	message: 'Get Contacts - System',&#10;	callId: correlationId,&#10;	time: now() &gt;&gt; &quot;Europe/Madrid&quot;&#10;}]" />
+        <salesforce:query doc:name="Query" doc:id="39ebd9fd-7250-4abc-a007-5fcec1808f6a" config-ref="Salesforce_Config">
+            <salesforce:salesforce-query><![CDATA[SELECT 
+  Id, AccountId, LastName, FirstName, Salutation, Name, MailingStreet
+FROM 
+  Contact]]></salesforce:salesforce-query>
+        </salesforce:query>
+        <ee:transform doc:name="Transform Message" doc:id="edb1f8fb-3d88-4e43-8ee6-fe0b1169bab6">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <logger level="DEBUG" doc:name="payload" doc:id="f98d6ab4-eebf-4993-a033-3c25d5eaf423" message='#[output application/json&#10;---&#10;{&#10;	tracepoint: "FLOW",&#10;	message: payload,&#10;	callId: correlationId,&#10;	time: now() &gt;&gt; "Europe/Madrid"&#10;}]' category="com.deloitte.test" />
+        <logger level="INFO" doc:name="END" doc:id="12ddf603-fa64-4d9a-8aae-922e97eeeabb" message="#[output application/json&#10;---&#10;{&#10;	tracepoint: &quot;END&quot;,&#10;	message: 'Get Contacts - System',&#10;	callId: correlationId,&#10;	time: now() &gt;&gt; &quot;Europe/Madrid&quot;&#10;}]" />
+    </flow>
+</mule>
