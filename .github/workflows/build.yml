@@ -51,7 +51,7 @@ jobs:
           name: artifacts
           path: target/*.jar
         
-  deploy:
+  deploydev:
     needs: build
     runs-on: ubuntu-latest
     steps:    
@@ -86,7 +86,7 @@ jobs:
          -Denv=dev \
          -Dkey="$KEY"
 
-  deploy:
+  deploypre:
     needs: build
     runs-on: ubuntu-latest
     steps:    
