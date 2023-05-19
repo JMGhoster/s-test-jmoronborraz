@@ -1,10 +1,14 @@
-name: Build and Deploy to Dev
+name: Build and Deploy to Dev and Pre
 
 on:
   push:
-    branches: [ dev ]
+    branches:
+      - dev
+      - pre
   pull_request:
-    branches: [ dev ]
+    branches:
+      - dev
+      - pre
     
 jobs:
   build:
@@ -70,6 +74,7 @@ jobs:
         CLIENTID: ${{ secrets.anypoint_platform_client_id }}
         CLIENTSE: ${{ secrets.anypoint_platform_client_secret }}
         KEY: ${{ secrets.key }}
+      if: endsWith(github.ref, '/dev')
       run: |
         artifactName=$(ls *.jar | head -1)
         mvn deploy -DmuleDeploy \
@@ -80,3 +85,15 @@ jobs:
          -Danypoint.clientse="$CLIENTSE" \
          -Denv=dev \
          -Dkey="$KEY"
+      if: endsWith(github.ref, '/pre')
+      run: |
+        artifactName=$(ls *.jar | head -1)
+        mvn deploy -DmuleDeploy \
+         -Dmule.artifact=$artifactName \
+         -Danypoint.username="$USERNAME" \
+         -Danypoint.password="$PASSWORD" \
+         -Danypoint.clientid="$CLIENTID" \
+         -Danypoint.clientse="$CLIENTSE" \
+         -Denv=pre \
+         -Dkey="$KEY"
+        
