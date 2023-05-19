@@ -1,10 +1,14 @@
-name: Build and Deploy to Dev
+name: Build and Deploy to Dev and Pre
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - dev
+      - pre
   pull_request:
-    branches: [ master ]
+    branches:
+      - dev
+      - pre
     
 jobs:
   build:
@@ -24,6 +28,15 @@ jobs:
       with:
         distribution: 'zulu'
         java-version: 8
+    - name: maven-settings-xml-action
+      uses: whelk-io/maven-settings-xml-action@v20
+      env:
+        USERNAME: ${{ secrets.anypoint_platform_username }}
+        PASSWORD: ${{ secrets.anypoint_platform_password }}
+      with:
+        #repositories: '[{ "id": "some-repository", "url": "http://some.repository.url" }]'
+        #plugin_repositories: '[{ "id": "some-plugin-repository", "url": "http://some.plugin.repository.url" }]'
+        servers: '[{ "id": "exchange-server", "username": "$USERNAME", "password": "$PASSWORD" }]'
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Stamp artifact file name with commit hash
@@ -61,6 +74,7 @@ jobs:
         CLIENTID: ${{ secrets.anypoint_platform_client_id }}
         CLIENTSE: ${{ secrets.anypoint_platform_client_secret }}
         KEY: ${{ secrets.key }}
+      if: endsWith(github.ref, '/dev')
       run: |
         artifactName=$(ls *.jar | head -1)
         mvn deploy -DmuleDeploy \
@@ -70,4 +84,22 @@ jobs:
          -Danypoint.clientid="$CLIENTID" \
          -Danypoint.clientse="$CLIENTSE" \
          -Denv=dev \
+         -Dkey="$KEY"
+    - name: Deploy to Pre
+      env:
+        USERNAME: ${{ secrets.anypoint_platform_username }}
+        PASSWORD: ${{ secrets.anypoint_platform_password }}
+        CLIENTID: ${{ secrets.anypoint_platform_client_id }}
+        CLIENTSE: ${{ secrets.anypoint_platform_client_secret }}
+        KEY: ${{ secrets.key }}
+      if: endsWith(github.ref, '/pre')
+      run: |
+        artifactName=$(ls *.jar | head -1)
+        mvn deploy -DmuleDeploy \
+         -Dmule.artifact=$artifactName \
+         -Danypoint.username="$USERNAME" \
+         -Danypoint.password="$PASSWORD" \
+         -Danypoint.clientid="$CLIENTID" \
+         -Danypoint.clientse="$CLIENTSE" \
+         -Denv=pre \
          -Dkey="$KEY"
