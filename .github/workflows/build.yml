@@ -85,6 +85,13 @@ jobs:
          -Danypoint.clientse="$CLIENTSE" \
          -Denv=dev \
          -Dkey="$KEY"
+    - name: Deploy to Pre
+      env:
+        USERNAME: ${{ secrets.anypoint_platform_username }}
+        PASSWORD: ${{ secrets.anypoint_platform_password }}
+        CLIENTID: ${{ secrets.anypoint_platform_client_id }}
+        CLIENTSE: ${{ secrets.anypoint_platform_client_secret }}
+        KEY: ${{ secrets.key }}
       if: endsWith(github.ref, '/pre')
       run: |
         artifactName=$(ls *.jar | head -1)
