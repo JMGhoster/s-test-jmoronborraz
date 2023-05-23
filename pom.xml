@@ -8,7 +8,6 @@
 	<packaging>mule-application</packaging>
 
 	<name>s-test-jmoronborraz</name>
-	
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -72,6 +71,13 @@
 			<classifier>mule-plugin</classifier>
 		</dependency>
 		<dependency>
+			<groupId>6d124814-37f7-4766-acd3-0e33f24edc73</groupId>
+			<artifactId>s-test-jmoronborraz</artifactId>
+			<version>1.0.1</version>
+			<classifier>raml</classifier>
+			<type>zip</type>
+		</dependency>
+		<dependency>
 			<groupId>org.mule.modules</groupId>
 			<artifactId>mule-apikit-module</artifactId>
 			<version>1.8.2</version>
@@ -88,13 +94,6 @@
 			<artifactId>mule-objectstore-connector</artifactId>
 			<version>1.1.6</version>
 			<classifier>mule-plugin</classifier>
-		</dependency>
-		<dependency>
-			<groupId>6d124814-37f7-4766-acd3-0e33f24edc73</groupId>
-			<artifactId>s-test-jmoronborraz</artifactId>
-			<version>1.0.1</version>
-			<classifier>raml</classifier>
-			<type>zip</type>
 		</dependency>
 		<dependency>
 			<groupId>com.mulesoft.modules</groupId>

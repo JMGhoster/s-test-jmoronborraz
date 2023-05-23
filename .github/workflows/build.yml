@@ -30,13 +30,12 @@ jobs:
         java-version: 8
     - name: maven-settings-xml-action
       uses: whelk-io/maven-settings-xml-action@v20
-      env:
-        USERNAME: ${{ secrets.anypoint_platform_username }}
-        PASSWORD: ${{ secrets.anypoint_platform_password }}
       with:
         #repositories: '[{ "id": "some-repository", "url": "http://some.repository.url" }]'
         #plugin_repositories: '[{ "id": "some-plugin-repository", "url": "http://some.plugin.repository.url" }]'
-        servers: '[{ "id": "exchange-server", "username": "$USERNAME", "password": "$PASSWORD" }]'
+        servers: '[{ "id": "exchange-server", 
+            "username": "${{ secrets.anypoint_platform_username }}", 
+            "password": "${{ secrets.anypoint_platform_password }}" }]'
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Stamp artifact file name with commit hash
