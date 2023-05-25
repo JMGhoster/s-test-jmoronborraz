@@ -1,11 +1,22 @@
-name: Build and Deploy to Dev
+name: Build and Deploy to Dev and Pre
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - dev
+      - pre
   pull_request:
-    branches: [ master ]
-    
+    branches:
+      - dev
+      - pre
+   
+env:
+  ID: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
+  SECRET: ${{ secrets.CONNECTED_APP_CLIENT_SECRET }}
+  CLIENTID: ${{ secrets.ANYPOINT_PLATFORM_CLIENT_ID }}
+  CLIENTSE: ${{ secrets.ANYPOINT_PLATFORM_CLIENT_SECRET }}
+  KEY: ${{ secrets.KEY }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,6 +35,14 @@ jobs:
       with:
         distribution: 'zulu'
         java-version: 8
+    - name: maven-settings-xml-action
+      uses: whelk-io/maven-settings-xml-action@v20
+      with:
+        #repositories: '[{ "id": "some-repository", "url": "http://some.repository.url" }]'
+        #plugin_repositories: '[{ "id": "some-plugin-repository", "url": "http://some.plugin.repository.url" }]'
+        servers: '[{ "id": "exchange-server", 
+            "username": "~~~Client~~~", 
+            "password": "${{env.ID}}~?~${{env.SECRET}}" }]'
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Stamp artifact file name with commit hash
@@ -55,19 +74,26 @@ jobs:
       with:
         name: artifacts
     - name: Deploy to Dev
-      env:
-        USERNAME: ${{ secrets.anypoint_platform_username }}
-        PASSWORD: ${{ secrets.anypoint_platform_password }}
-        CLIENTID: ${{ secrets.anypoint_platform_client_id }}
-        CLIENTSE: ${{ secrets.anypoint_platform_client_secret }}
-        KEY: ${{ secrets.key }}
+      if: endsWith(github.ref, '/dev')
       run: |
         artifactName=$(ls *.jar | head -1)
         mvn deploy -DmuleDeploy \
          -Dmule.artifact=$artifactName \
-         -Danypoint.username="$USERNAME" \
-         -Danypoint.password="$PASSWORD" \
+         -Dclient.id="$ID" \
+         -Dclient.secret="$SECRET" \
          -Danypoint.clientid="$CLIENTID" \
          -Danypoint.clientse="$CLIENTSE" \
          -Denv=dev \
+         -Dkey="$KEY"
+    - name: Deploy to Pre
+      if: endsWith(github.ref, '/pre')
+      run: |
+        artifactName=$(ls *.jar | head -1)
+        mvn deploy -DmuleDeploy \
+         -Dmule.artifact=$artifactName \
+         -Dclient.id="$ID" \
+         -Dclient.secret="$SECRET" \
+         -Danypoint.clientid="$CLIENTID" \
+         -Danypoint.clientse="$CLIENTSE" \
+         -Denv=pre \
          -Dkey="$KEY"
