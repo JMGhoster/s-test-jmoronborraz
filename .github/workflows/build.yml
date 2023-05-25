@@ -9,7 +9,14 @@ on:
     branches:
       - dev
       - pre
-    
+   
+env:
+  ID: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
+  SECRET: ${{ secrets.CONNECTED_APP_CLIENT_SECRET }}
+  CLIENTID: ${{ secrets.ANYPOINT_PLATFORM_CLIENT_ID }}
+  CLIENTSE: ${{ secrets.ANYPOINT_PLATFORM_CLIENT_SECRET }}
+  KEY: ${{ secrets.KEY }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -35,7 +42,7 @@ jobs:
         #plugin_repositories: '[{ "id": "some-plugin-repository", "url": "http://some.plugin.repository.url" }]'
         servers: '[{ "id": "exchange-server", 
             "username": "~~~Client~~~", 
-            "password": "${{ secrets.CONNECTED_APP_CLIENT_ID }}~?~${{ secrets.CONNECTED_APP_CLIENT_SECRET }}" }]'
+            "password": "${{env.ID}}~?~${{env.SECRET}}" }]'
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Stamp artifact file name with commit hash
@@ -67,12 +74,6 @@ jobs:
       with:
         name: artifacts
     - name: Deploy to Dev
-      env:
-        ID: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
-        SECRET: ${{ secrets.CONNECTED_APP_CLIENT_SECRET }}
-        CLIENTID: ${{ secrets.ANYPOINT_PLATFORM_CLIENT_ID }}
-        CLIENTSE: ${{ secrets.ANYPOINT_PLATFORM_CLIENT_SECRET }}
-        KEY: ${{ secrets.KEY }}
       if: endsWith(github.ref, '/dev')
       run: |
         artifactName=$(ls *.jar | head -1)
@@ -85,12 +86,6 @@ jobs:
          -Denv=dev \
          -Dkey="$KEY"
     - name: Deploy to Pre
-      env:
-        ID: ${{ secrets.CONNECTED_APP_CLIENT_ID }}
-        SECRET: ${{ secrets.CONNECTED_APP_CLIENT_SECRET }}
-        CLIENTID: ${{ secrets.ANYPOINT_PLATFORM_CLIENT_ID }}
-        CLIENTSE: ${{ secrets.ANYPOINT_PLATFORM_CLIENT_SECRET }}
-        KEY: ${{ secrets.KEY }}
       if: endsWith(github.ref, '/pre')
       run: |
         artifactName=$(ls *.jar | head -1)
