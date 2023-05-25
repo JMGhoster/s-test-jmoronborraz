@@ -42,7 +42,7 @@ jobs:
         #plugin_repositories: '[{ "id": "some-plugin-repository", "url": "http://some.plugin.repository.url" }]'
         servers: '[{ "id": "exchange-server", 
             "username": "~~~Client~~~", 
-            "password": "$ID~?~$SECRET" }]'
+            "password": "${{ID}}~?~${{SECRET}}" }]'
     - name: Build with Maven
       run: mvn -B package --file pom.xml
     - name: Stamp artifact file name with commit hash
